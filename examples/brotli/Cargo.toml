@@ -1,0 +1,24 @@
+[package]
+name = "og_brotli"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+disable_upgrade_checks = ["omniglot/unsound", "omniglot/disable_upgrade_checks"]
+disable_validation_checks = ["omniglot/unsound", "omniglot/disable_validation_checks"]
+
+[build-dependencies]
+bindgen.workspace = true
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+[dependencies]
+omniglot.workspace = true
+omniglot-mpk = { path = "../../omniglot-mpk" }
+env_logger = "0.11.3"
+rand = { version = "0.8.5", default-features = false, features = ["small_rng"] }
+
+[[bench]]
+name = "brotli_compression_comparison"
+harness = false

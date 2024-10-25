@@ -1,0 +1,31 @@
+wrapper_name = "LibPng"
+
+[functions.png_create_read_struct]
+fntab_id = 1
+
+[functions.png_create_info_struct]
+fntab_id = 2
+
+[functions.png_sig_cmp]
+fntab_id = 3
+
+[functions.png_set_read_fn]
+fntab_id = 4
+
+[functions.png_read_info_nojmp]
+fntab_id = 5
+
+[functions.png_get_image_height]
+fntab_id = 6
+
+[functions.png_get_rowbytes]
+fntab_id = 7
+
+[functions.png_read_image_nojmp]
+fntab_id = 8
+
+[functions.malloc]
+fntab_id = 9
+
+[functions.png_destroy_read_struct]
+fntab_id = 10

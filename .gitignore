@@ -1,0 +1,12 @@
+# Rust target directories
+target
+
+# GDB history files
+.gdb_history
+
+# Ignore VIM temp/swapfiles
+*.swp
+
+# Ignore Nix result symlinks
+result
+result-*

@@ -1,0 +1,28 @@
+[workspace]
+resolver = "2"
+members = [
+    "omniglot-mpk",
+    "examples/brotli",
+    "examples/libpng",
+    "examples/libsodium",
+    "examples/ubench",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+
+[workspace.dependencies.omniglot]
+git = "https://github.com/omniglot-rs/omniglot"
+rev = "8423d6cc212692b47a9a1d55c27533e326725d8a"
+# path = "../omniglot"
+features = [ "std" ]
+
+[workspace.dependencies.bindgen]
+git = "https://github.com/omniglot-rs/rust-bindgen"
+rev = "b54f076fcd126a103f3089af15e9789e4a403d11"
+# path = "../rust-bindgen/bindgen"
+
+[workspace.dependencies.sandcrust]
+git = "https://github.com/atopia/sandcrust"
+rev = "9d75f9e966d4216d8a858f10639483f05ce4706b"

@@ -1,0 +1,21 @@
+[package]
+name = "omniglot-mpk"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["mpkrt_foreign_stack_alloc"]
+mpkrt_foreign_stack_alloc = []
+mpkrt_heap_alloc_mprotect = []
+
+[build-dependencies]
+bindgen.workspace = true
+
+[dependencies]
+omniglot.workspace = true
+libc = "0.2.164"
+
+log = "0.4.21"
+memfd = "0.6.4"
+patchelf = "0.2.1"
+tempfile = "3.10.1"

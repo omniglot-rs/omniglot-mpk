@@ -1,0 +1,4 @@
+[toolchain]
+channel = "nightly-2025-06-04"
+components = ["rustfmt", "clippy"]
+targets = ["x86_64-unknown-linux-gnu"]

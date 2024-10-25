@@ -1,0 +1,31 @@
+wrapper_name = "LibSodium"
+
+[functions.sodium_init]
+fntab_id = 1
+
+[functions.sodium_library_version_major]
+fntab_id = 2
+
+[functions.sodium_library_version_minor]
+fntab_id = 3
+
+[functions.sodium_version_string]
+fntab_id = 4
+
+[functions.randombytes_random]
+fntab_id = 5
+
+[functions.crypto_generichash]
+fntab_id = 6
+
+[functions.crypto_box_seed_keypair]
+fntab_id = 7
+
+[functions.randombytes_buf_deterministic]
+fntab_id = 8
+
+[functions.crypto_box_easy]
+fntab_id = 9
+
+[functions.crypto_box_open_easy]
+fntab_id = 10

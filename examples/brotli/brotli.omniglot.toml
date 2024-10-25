@@ -1,0 +1,7 @@
+wrapper_name = "Brotli"
+
+[functions.BrotliEncoderCompress]
+fntab_id = 1
+
+[functions.BrotliDecoderDecompress]
+fntab_id = 2
