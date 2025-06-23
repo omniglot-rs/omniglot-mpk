@@ -13,16 +13,17 @@ version = "0.1.0"
 edition = "2021"
 
 [workspace.dependencies.omniglot]
-git = "https://github.com/omniglot-rs/omniglot"
-rev = "82f17de8cc588643ccd28d42dd0e2cccaba6d6b6"
-# path = "../omniglot"
+# git = "https://github.com/omniglot-rs/omniglot"
+# rev = "82f17de8cc588643ccd28d42dd0e2cccaba6d6b6"
+path = "../omniglot"
 features = [ "std" ]
 
 [workspace.dependencies.bindgen]
-git = "https://github.com/omniglot-rs/rust-bindgen"
-rev = "b54f076fcd126a103f3089af15e9789e4a403d11"
-# path = "../rust-bindgen/bindgen"
+# git = "https://github.com/omniglot-rs/rust-bindgen"
+# rev = "b54f076fcd126a103f3089af15e9789e4a403d11"
+path = "../rust-bindgen/bindgen"
 
 [workspace.dependencies.sandcrust]
-git = "https://github.com/atopia/sandcrust"
-rev = "9d75f9e966d4216d8a858f10639483f05ce4706b"
+# git = "https://github.com/atopia/sandcrust"
+# rev = "9d75f9e966d4216d8a858f10639483f05ce4706b"
+path = "../sandcrust"

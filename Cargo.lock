@@ -86,7 +86,6 @@ dependencies = [
 [[package]]
 name = "bindgen"
 version = "0.69.4"
-source = "git+https://github.com/omniglot-rs/rust-bindgen?rev=b54f076fcd126a103f3089af15e9789e4a403d11#b54f076fcd126a103f3089af15e9789e4a403d11"
 dependencies = [
  "bitflags",
  "cexpr",
@@ -675,7 +674,6 @@ dependencies = [
 [[package]]
 name = "omniglot"
 version = "0.1.0"
-source = "git+https://github.com/omniglot-rs/omniglot?rev=82f17de8cc588643ccd28d42dd0e2cccaba6d6b6#82f17de8cc588643ccd28d42dd0e2cccaba6d6b6"
 dependencies = [
  "seq-macro",
 ]
@@ -947,7 +945,6 @@ dependencies = [
 [[package]]
 name = "sandcrust"
 version = "0.1.0"
-source = "git+https://github.com/atopia/sandcrust?rev=9d75f9e966d4216d8a858f10639483f05ce4706b#9d75f9e966d4216d8a858f10639483f05ce4706b"
 dependencies = [
  "bincode",
  "lazy_static 0.2.11",
