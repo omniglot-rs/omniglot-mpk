@@ -67,7 +67,7 @@ fn build_bench_executable(target_name: &str) -> PathBuf {
 pub fn criterion_benchmark(c: &mut Criterion) {
     // Build all binaries in release mode and determine their target paths:
     let unsafe_executable = build_bench_executable("process_startup_demo_nop_unsafe");
-    let ef_mpk_executable = build_bench_executable("process_startup_demo_nop_ef_mpk");
+    let og_mpk_executable = build_bench_executable("process_startup_demo_nop_og_mpk");
     let sandcrust_executable = build_bench_executable("process_startup_demo_nop_sandcrust");
 
     let mut group = c.benchmark_group("runtime_setup");
@@ -76,8 +76,8 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         b.iter(|| Command::new(&unsafe_executable).output().unwrap());
     });
 
-    group.bench_function("ef_mpk", |b| {
-        b.iter(|| Command::new(&ef_mpk_executable).output().unwrap());
+    group.bench_function("og_mpk", |b| {
+        b.iter(|| Command::new(&og_mpk_executable).output().unwrap());
     });
 
     group.bench_function("sandcrust", |b| {

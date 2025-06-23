@@ -96,7 +96,7 @@ fn bench_group_args<
         }
     });
 
-    group.bench_with_input(BenchmarkId::new("ef_mpk", ARG_COUNT), &ARG_COUNT, |b, _| {
+    group.bench_with_input(BenchmarkId::new("og_mpk", ARG_COUNT), &ARG_COUNT, |b, _| {
         for _ in 0..STACK_RANDOMIZE_ITERS {
             let stack_bytes: usize =
                 prng.gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
