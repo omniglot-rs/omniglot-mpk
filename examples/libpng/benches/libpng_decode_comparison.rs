@@ -74,7 +74,12 @@ pub fn criterion_benchmark(c: &mut Criterion) {
             .unwrap()
             .filter_map(|dir_entry_res| {
                 let dir_entry = dir_entry_res.unwrap();
-                if dir_entry.file_type().unwrap().is_file() {
+                if dir_entry.file_type().unwrap().is_file()
+                    && dir_entry
+                        .path()
+                        .extension()
+                        .is_some_and(|ext| ext.to_ascii_lowercase() == "png")
+                {
                     Some((
                         dir_entry.file_name().into_string().unwrap(),
                         std::fs::read(dir_entry.path()).unwrap(),
