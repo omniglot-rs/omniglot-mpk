@@ -14,7 +14,7 @@ edition = "2021"
 
 [workspace.dependencies.omniglot]
 git = "https://github.com/omniglot-rs/omniglot"
-rev = "8423d6cc212692b47a9a1d55c27533e326725d8a"
+rev = "82f17de8cc588643ccd28d42dd0e2cccaba6d6b6"
 # path = "../omniglot"
 features = [ "std" ]
 
