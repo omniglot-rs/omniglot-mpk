@@ -2692,6 +2692,7 @@ unsafe impl<ID: OGID> OGRuntime for OGMPKRuntime<ID> {
 
     fn execute<R, F: FnOnce() -> R>(
         &self,
+        _target_symbol: *const (),
         alloc_scope: &mut AllocScope<'_, Self::AllocTracker<'_>, Self::ID>,
         _access_scope: &mut AccessScope<Self::ID>,
         f: F,

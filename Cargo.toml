@@ -14,13 +14,13 @@ edition = "2021"
 
 [workspace.dependencies.omniglot]
 git = "https://github.com/omniglot-rs/omniglot"
-rev = "82f17de8cc588643ccd28d42dd0e2cccaba6d6b6"
+rev = "a9cda47f9c0f8ce943fef63b139dcf960687a1a2"
 # path = "../omniglot"
 features = [ "std" ]
 
 [workspace.dependencies.bindgen]
 git = "https://github.com/omniglot-rs/rust-bindgen"
-rev = "b54f076fcd126a103f3089af15e9789e4a403d11"
+rev = "568c9c50f876776a46a82568c69217d8e70d1781"
 # path = "../rust-bindgen/bindgen"
 
 [workspace.dependencies.sandcrust]
