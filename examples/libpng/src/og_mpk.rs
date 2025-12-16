@@ -57,8 +57,7 @@ pub fn libpng_init<ID: OGID, RT: OGRuntime<ID = ID>, L: LibPng<ID, RT, RT = RT>>
                     access,
                 )
                 .unwrap()
-                .validate()
-                .unwrap()
+                .valid_ptr()
             },
         )
         .unwrap();
@@ -67,8 +66,7 @@ pub fn libpng_init<ID: OGID, RT: OGRuntime<ID = ID>, L: LibPng<ID, RT, RT = RT>>
     let info_ptr = lib
         .png_create_info_struct(png_ptr, alloc, access)
         .unwrap()
-        .validate()
-        .unwrap();
+        .valid_ptr();
     assert!(!info_ptr.is_null(), "Failed to create png_info type");
 
     (png_ptr, info_ptr)
@@ -221,8 +219,7 @@ pub fn decode_png<ID: OGID, RT: OGRuntime<ID = ID>, L: LibPng<ID, RT, RT = RT>, 
                     let dst_buffer: *mut u8 = lib
                         .malloc(alloc_size as u64, alloc, access)
                         .unwrap()
-                        .validate()
-                        .unwrap() as *mut u8;
+                        .valid_ptr() as *mut u8;
                     assert!(
                         !dst_buffer.is_null(),
                         "Failed to alloc {} bytes for the decompressed image!",

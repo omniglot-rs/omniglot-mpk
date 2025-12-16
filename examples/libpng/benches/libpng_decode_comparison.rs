@@ -145,8 +145,7 @@ pub fn criterion_benchmark(c: &mut Criterion) {
             let og_mpk_dst_buffer: *mut u8 = lib
                 .malloc(max_buffer_size as u64, &mut alloc, &mut access)
                 .unwrap()
-                .validate()
-                .unwrap() as *mut u8;
+                .valid_ptr() as *mut u8;
             assert!(og_mpk_dst_buffer as usize % std::mem::align_of::<*mut u8>() == 0);
 
             let mut unsafe_dst_buffer =
