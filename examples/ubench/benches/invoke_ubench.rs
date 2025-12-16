@@ -88,7 +88,7 @@ fn bench_group_args<
     group.bench_with_input(BenchmarkId::new("unsafe", ARG_COUNT), &ARG_COUNT, |b, _| {
         for _ in 0..STACK_RANDOMIZE_ITERS {
             let stack_bytes: usize =
-                prng.gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
+                prng.random_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
             push_stack_bytes(stack_bytes, || {
                 // println!("Pushed {} bytes onto the stack...", stack_bytes);
                 b.iter(|| bench_args_unsafe::<ARG_COUNT>());
@@ -99,9 +99,9 @@ fn bench_group_args<
     group.bench_with_input(BenchmarkId::new("og_mpk", ARG_COUNT), &ARG_COUNT, |b, _| {
         for _ in 0..STACK_RANDOMIZE_ITERS {
             let stack_bytes: usize =
-                prng.gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
+                prng.random_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
             let foreign_stack_bytes: usize =
-                prng.gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
+                prng.random_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
             push_stack_bytes(stack_bytes, || {
                 lib.rt()
                     .allocate_stacked_mut(
@@ -123,7 +123,7 @@ fn bench_group_args<
         |b, _| {
             for _ in 0..STACK_RANDOMIZE_ITERS {
                 let stack_bytes: usize =
-                    prng.gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
+                    prng.random_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
                 push_stack_bytes(stack_bytes, || {
                     // println!("Pushed {} bytes onto the stack...", stack_bytes);
                     b.iter(|| bench_args_sandcrust::<ARG_COUNT>());

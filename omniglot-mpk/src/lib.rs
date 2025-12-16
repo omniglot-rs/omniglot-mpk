@@ -12,7 +12,6 @@ use std::collections::HashMap;
 use std::ffi::{c_void, CStr, CString};
 use std::io::{Seek, SeekFrom, Write};
 use std::marker::PhantomData;
-use std::mem::MaybeUninit;
 use std::ops::Range;
 use std::os::fd::AsRawFd;
 use std::path::PathBuf;
@@ -25,6 +24,7 @@ use omniglot::abi::calling_convention::{Stacked, AREG0, AREG1, AREG2, AREG3, ARE
 use omniglot::abi::sysv_amd64::SysVAMD64ABI;
 use omniglot::alloc_tracker::AllocTracker;
 use omniglot::foreign_memory::og_copy::OGCopy;
+use omniglot::foreign_memory::og_ret::OGRet;
 use omniglot::id::OGID;
 use omniglot::markers::{AccessScope, AllocScope};
 use omniglot::rt::sysv_amd64::{SysVAMD64BaseRt, SysVAMD64InvokeRes, SysVAMD64Rt};
@@ -2582,6 +2582,10 @@ pub struct OGMPKRuntimeCallbackContext {
 }
 
 impl CallbackContext for OGMPKRuntimeCallbackContext {
+    fn get_stack_pointer(&self) -> *mut c_void {
+        todo!()
+    }
+
     fn get_argument_register(&self, reg: usize) -> Option<usize> {
         self.arg_regs.get(reg).copied()
     }
@@ -2687,15 +2691,16 @@ unsafe impl<ID: OGID> OGRuntime for OGMPKRuntime<ID> {
     type CallbackTrampolineFn = OGMPKRuntimeCallbackTrampolineFn;
     type CallbackContext = OGMPKRuntimeCallbackContext;
     type CallbackReturn = OGMPKRuntimeCallbackReturn;
-    type SymbolTableState<const SYMTAB_SIZE: usize, const FIXED_OFFSET_SYMTAB_SIZE: usize> =
+    type SymbolTableState<'a, const SYMTAB_SIZE: usize, const FIXED_OFFSET_SYMTAB_SIZE: usize> =
         OmniglotMPKSymbolTable<SYMTAB_SIZE>;
 
     fn execute<R, F: FnOnce() -> R>(
         &self,
+        _target_symbol: *const (),
         alloc_scope: &mut AllocScope<'_, Self::AllocTracker<'_>, Self::ID>,
         _access_scope: &mut AccessScope<Self::ID>,
         f: F,
-    ) -> R {
+    ) -> OGResult<R> {
         // Initialize `RUST_THREAD_STATE` for the current thread.
         //
         // SAFETY: no concurrent accesses to this static mut right now.
@@ -2716,22 +2721,22 @@ unsafe impl<ID: OGID> OGRuntime for OGMPKRuntime<ID> {
             .active_alloc_scope
             .set(prev_active_alloc_scope);
 
-        res
+        Ok(res)
     }
 
-    fn resolve_symbols<const SYMTAB_SIZE: usize, const FIXED_OFFSET_SYMTAB_SIZE: usize>(
+    fn resolve_symbols<'a, const SYMTAB_SIZE: usize, const FIXED_OFFSET_SYMTAB_SIZE: usize>(
         &self,
-        compact_symbol_table: &'static [&'static CStr; SYMTAB_SIZE],
-        _fixed_offset_symbol_table: &'static [Option<&'static CStr>; FIXED_OFFSET_SYMTAB_SIZE],
-    ) -> Option<Self::SymbolTableState<SYMTAB_SIZE, FIXED_OFFSET_SYMTAB_SIZE>> {
+        compact_symbol_table: &'a [&'a CStr; SYMTAB_SIZE],
+        _fixed_offset_symbol_table: &'a [Option<&'a CStr>; FIXED_OFFSET_SYMTAB_SIZE],
+    ) -> Result<Self::SymbolTableState<'a, SYMTAB_SIZE, FIXED_OFFSET_SYMTAB_SIZE>, Option<&'a CStr>>
+    {
         // Hold the DL_LOCK for the entire duration of this operation:
         let _dl_lock_guard = DL_LOCK.lock().unwrap();
 
-        // TODO: this might use an excessive amount of stack space:
-        let mut err: bool = false;
+        let mut missing_symbol = None;
 
         let symbols = compact_symbol_table.clone().map(|symbol_name| {
-            if err {
+            if missing_symbol.is_some() {
                 // If we error on one symbol, don't need to loop up others.
                 std::ptr::null()
             } else {
@@ -2750,23 +2755,23 @@ unsafe impl<ID: OGID> OGRuntime for OGMPKRuntime<ID> {
                 }
 
                 // Did not find a library that exposes this symbol:
-                err = true;
+                missing_symbol = Some(symbol_name);
                 std::ptr::null_mut()
             }
         });
 
-        if err {
-            None
+        if let Some(s) = missing_symbol {
+            Err(Some(s))
         } else {
-            Some(OmniglotMPKSymbolTable { symbols })
+            Ok(OmniglotMPKSymbolTable { symbols })
         }
     }
 
-    fn lookup_symbol<const SYMTAB_SIZE: usize, const FIXED_OFFSET_SYMTAB_SIZE: usize>(
+    fn lookup_symbol<'a, const SYMTAB_SIZE: usize, const FIXED_OFFSET_SYMTAB_SIZE: usize>(
         &self,
         compact_symtab_index: usize,
         _fixed_offset_symtab_index: usize,
-        symtabstate: &Self::SymbolTableState<SYMTAB_SIZE, FIXED_OFFSET_SYMTAB_SIZE>,
+        symtabstate: &Self::SymbolTableState<'a, SYMTAB_SIZE, FIXED_OFFSET_SYMTAB_SIZE>,
     ) -> Option<*const ()> {
         symtabstate.symbols.get(compact_symtab_index).copied()
     }
@@ -3009,7 +3014,7 @@ unsafe impl<RT: SysVAMD64BaseRt, T> SysVAMD64InvokeRes<RT, T> for OmniglotMPKInv
         }
     }
 
-    fn into_result_registers(self, _rt: &RT) -> OGResult<OGCopy<T>> {
+    fn into_result_registers(self, _rt: &RT) -> OGResult<OGRet<T>> {
         self.encode_eferror()?;
 
         // Basic assumptions in this method:
@@ -3022,11 +3027,6 @@ unsafe impl<RT: SysVAMD64BaseRt, T> SysVAMD64InvokeRes<RT, T> for OmniglotMPKInv
         // pointers (128 bit), as those cannot possibly be encoded in the
         // two available 64-bit return registers:
         assert!(std::mem::size_of::<T>() <= 2 * std::mem::size_of::<*const ()>());
-
-        // Allocate space to construct the final (unvalidated) T from
-        // the register values. During copy, we treat the memory of T
-        // as integers:
-        let mut ret_uninit: MaybeUninit<T> = MaybeUninit::uninit();
 
         // TODO: currently, we only support power-of-two return values.
         // It is not immediately obvious how values that are, e.g.,
@@ -3052,33 +3052,23 @@ unsafe impl<RT: SysVAMD64BaseRt, T> SysVAMD64InvokeRes<RT, T> for OmniglotMPKInv
             rdx_bytes[7],
         ];
 
-        // TODO:
-        #[allow(deprecated)]
-        MaybeUninit::copy_from_slice(
-            ret_uninit.as_bytes_mut(),
+        OGResult::Ok(OGRet::from_og_copy(OGCopy::from_bytes(
             &ret_bytes[..std::mem::size_of::<T>()],
-        );
-
-        OGResult::Ok(ret_uninit.into())
+        )))
     }
 
-    unsafe fn into_result_stacked(self, _rt: &RT, stacked_res: *mut T) -> OGResult<OGCopy<T>> {
+    unsafe fn into_result_stacked(self, _rt: &RT, stacked_res: *mut T) -> OGResult<OGRet<T>> {
         self.encode_eferror()?;
 
-        // Allocate space to construct the final (unvalidated) T from
-        // the register values. During copy, we treat the memory of T
-        // as integers:
-        let mut ret_uninit: MaybeUninit<T> = MaybeUninit::uninit();
+        // Copy the return value from the foreign library's stack.
+        //
+        // TODO: reason about safety.
+        //
+        let ret = OGRet::from_og_copy(OGCopy::from_bytes(unsafe {
+            std::slice::from_raw_parts(stacked_res as *const u8, std::mem::size_of::<T>())
+        }));
 
-        // Now, we simply to a memcpy from our pointer. We trust the caller
-        // that is allocated, non-aliased over any Rust struct, not being
-        // mutated and accessible to us. We cast it into a layout-compatible
-        // MaybeUninit pointer:
-        unsafe {
-            std::ptr::copy_nonoverlapping(stacked_res as *const T, ret_uninit.as_mut_ptr(), 1)
-        };
-
-        OGResult::Ok(ret_uninit.into())
+        OGResult::Ok(ret)
     }
 }
 

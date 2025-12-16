@@ -56,9 +56,9 @@ fn bench_callback<ID: OGID, RT: OGRuntime<ID = ID>, L: LibOGDemo<ID, RT, RT = RT
         |b, _| {
             for _ in 0..STACK_RANDOMIZE_ITERS {
                 let stack_bytes: usize =
-                    prng.gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
+                    prng.random_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
                 let foreign_stack_bytes: usize =
-                    prng.gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
+                    prng.random_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
                 push_stack_bytes(stack_bytes, || {
                     lib.rt()
                         .allocate_stacked_mut(

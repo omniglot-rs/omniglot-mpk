@@ -163,7 +163,7 @@ pub fn test_brotli<ID: OGID, RT: OGRuntime<ID = ID>, L: Brotli<ID, RT, RT = RT>>
                         // Compare the encoded & decoded message:
                         assert_eq!(
                             message_to_compress,
-                            &*decoded_buf.as_immut().validate_as_str(access).unwrap(),
+                            str::from_utf8(&*decoded_buf.as_immut().valid(access)).unwrap(),
                         );
                     },
                 )

@@ -1,4 +1,4 @@
-use rand::distributions::{DistString, Standard, Uniform};
+use rand::distr::{SampleString, StandardUniform, Uniform};
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 
@@ -38,20 +38,21 @@ pub fn criterion_benchmark(c: &mut Criterion) {
             //for size in (0..).map(|n| 8usize.pow(n)).take(10) {
             for size in [1, 8, 64, 1024, 8 * 1028, 1024 * 1024] {
                 let to_validate_bytes = (&mut prng)
-                    .sample_iter(Uniform::new_inclusive(u8::MIN, u8::MAX))
+                    .sample_iter(Uniform::new_inclusive(u8::MIN, u8::MAX).unwrap())
                     .take(size)
                     .collect::<Vec<u8>>();
 
-                let to_validate_string = DistString::sample_string(&Standard, &mut prng, size);
+                let to_validate_string =
+                    SampleString::sample_string(&StandardUniform, &mut prng, size);
 
                 group.throughput(Throughput::Bytes(size as u64));
 
                 group.bench_with_input(BenchmarkId::new("u8", size), &size, |b, _| {
                     for _ in 0..STACK_RANDOMIZE_ITERS {
                         let stack_bytes: usize = (&mut prng)
-                            .gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
+                            .random_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
                         let foreign_stack_bytes: usize = (&mut prng)
-                            .gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
+                            .random_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
                         push_stack_bytes(stack_bytes, || {
                             lib.rt()
                                 .allocate_stacked_mut(
@@ -90,9 +91,9 @@ pub fn criterion_benchmark(c: &mut Criterion) {
                 group.bench_with_input(BenchmarkId::new("str", size), &size, |b, _| {
                     for _ in 0..STACK_RANDOMIZE_ITERS {
                         let stack_bytes: usize = (&mut prng)
-                            .gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
+                            .random_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
                         let foreign_stack_bytes: usize = (&mut prng)
-                            .gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
+                            .random_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
                         push_stack_bytes(stack_bytes, || {
                             lib.rt()
                                 .allocate_stacked_mut(
@@ -113,10 +114,12 @@ pub fn criterion_benchmark(c: &mut Criterion) {
                                                     let slice_ref = &slice_alloc;
                                                     b.iter(|| {
                                                         black_box(
-                                                            black_box(slice_ref)
-                                                                .as_immut()
-                                                                .validate_as_str(&mut access)
-                                                                .unwrap(),
+                                                            str::from_utf8(
+                                                                &*black_box(slice_ref)
+                                                                    .as_immut()
+                                                                    .valid(&access),
+                                                            )
+                                                            .unwrap(),
                                                         );
                                                     })
                                                 },
