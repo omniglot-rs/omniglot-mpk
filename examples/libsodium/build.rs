@@ -2,10 +2,13 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
-    // Tell cargo to tell rustc to link the system's libsodium shared
-    // library. This is required for the Mock runtime, which simply
-    // calls the raw function symbols.
-    println!("cargo:rustc-link-lib=sodium");
+    println!(
+        "cargo:rustc-link-search={}",
+        std::path::Path::new(&env::var("CARGO_MANIFEST_DIR").unwrap())
+            .join("./og_sodium_lfi/sodium_native/install/lib")
+            .display()
+    );
+    println!("cargo:rustc-link-lib=static=sodium");
 
     // The bindgen::Builder is the main entry point
     // to bindgen, and lets you build up options for

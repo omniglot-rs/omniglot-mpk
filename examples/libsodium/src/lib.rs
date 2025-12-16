@@ -721,7 +721,12 @@ pub fn with_mpkrt_lib<ID: OGID, R>(
     ) -> R,
 ) -> R {
     let (rt, mut alloc, mut access) = omniglot_mpk::OGMPKRuntime::new(
-        [c"libsodium.so"].into_iter(),
+        [&std::ffi::CString::new(format!(
+            "{}/og_sodium_lfi/og_sodium_native_pic.so",
+            env!("CARGO_MANIFEST_DIR")
+        ))
+        .unwrap()]
+        .into_iter(),
         brand,
         //Some(GLOBAL_PKEY_ALLOC.get_pkey()),
         None,

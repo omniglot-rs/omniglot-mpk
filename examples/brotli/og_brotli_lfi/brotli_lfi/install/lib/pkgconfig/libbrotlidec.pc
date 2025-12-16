@@ -1,0 +1,12 @@
+prefix=/home/runner/work/omniglot-lfi/omniglot-lfi/examples/brotli/og_brotli_lfi/build/brotli_lfi/install
+exec_prefix=/home/runner/work/omniglot-lfi/omniglot-lfi/examples/brotli/og_brotli_lfi/build/brotli_lfi/install
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libbrotlidec
+URL: https://github.com/google/brotli
+Description: Brotli decoder library
+Version: 1.2.0
+Libs: -L${libdir} -lbrotlidec
+Requires.private: libbrotlicommon >= 1.2.0
+Cflags: -I${includedir}

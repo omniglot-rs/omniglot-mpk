@@ -1,0 +1,11 @@
+prefix=/home/runner/work/omniglot-lfi/omniglot-lfi/examples/brotli/og_brotli_lfi/build/brotli_lfi/install
+exec_prefix=/home/runner/work/omniglot-lfi/omniglot-lfi/examples/brotli/og_brotli_lfi/build/brotli_lfi/install
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libbrotlicommon
+URL: https://github.com/google/brotli
+Description: Brotli common dictionary library
+Version: 1.2.0
+Libs: -L${libdir} -lbrotlicommon -lm
+Cflags: -I${includedir}

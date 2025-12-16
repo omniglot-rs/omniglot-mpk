@@ -67,6 +67,19 @@ fn main() {
         "Failed to compile the libpng_nojmp wrapper!",
     );
 
-    println!("cargo:rustc-link-lib=png");
-    println!("cargo:rustc-link-search={}", out_path.display());
+    println!(
+        "cargo:rustc-link-search={}",
+        std::path::Path::new(&env::var("CARGO_MANIFEST_DIR").unwrap())
+            .join("./og_libpng_lfi/zlib_native/install/lib")
+            .display()
+    );
+    println!("cargo:rustc-link-lib=static=z");
+
+    println!(
+        "cargo:rustc-link-search={}",
+        std::path::Path::new(&env::var("CARGO_MANIFEST_DIR").unwrap())
+            .join("./og_libpng_lfi/libpng_native/install/lib")
+            .display()
+    );
+    println!("cargo:rustc-link-lib=static=png");
 }

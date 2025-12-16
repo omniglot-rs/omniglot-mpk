@@ -2,9 +2,15 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
-    println!("cargo:rustc-link-lib=brotlienc");
-    println!("cargo:rustc-link-lib=brotlidec");
-    println!("cargo:rustc-link-lib=brotlicommon");
+    println!(
+        "cargo:rustc-link-search={}",
+        std::path::Path::new(&env::var("CARGO_MANIFEST_DIR").unwrap())
+            .join("./og_brotli_lfi/brotli_native/install/lib")
+            .display()
+    );
+    println!("cargo:rustc-link-lib=static=brotlienc");
+    println!("cargo:rustc-link-lib=static=brotlidec");
+    println!("cargo:rustc-link-lib=static=brotlicommon");
 
     let bindings = bindgen::Builder::default()
         .header("wrapper.h")

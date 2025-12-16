@@ -258,11 +258,11 @@ pub fn with_mpkrt_lib<ID: OGID, R>(
     ) -> R,
 ) -> R {
     let (rt, alloc, access) = omniglot_mpk::OGMPKRuntime::new(
-        [
-            c"libbrotlienc.so",
-            c"libbrotlidec.so",
-            c"libbrotlicommon.so",
-        ]
+        [&std::ffi::CString::new(format!(
+            "{}/og_brotli_lfi/og_brotli_native_pic.so",
+            env!("CARGO_MANIFEST_DIR")
+        ))
+        .unwrap()]
         .into_iter(),
         brand,
         //Some(GLOBAL_PKEY_ALLOC.get_pkey()),

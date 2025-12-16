@@ -1,4 +1,3 @@
-use std::ffi::CString;
 use std::ptr;
 
 use omniglot::foreign_memory::og_mut_slice::OGMutSlice;
@@ -22,7 +21,13 @@ pub fn with_mpkrt_lib<ID: OGID, R>(
     ) -> R,
 ) -> R {
     let (rt, alloc, access) = omniglot_mpk::OGMPKRuntime::new(
-        [CString::new(concat!(env!("OUT_DIR"), "/libpng_nojmp.so")).unwrap()].into_iter(),
+        // [CString::new(concat!(env!("OUT_DIR"), "/libpng_nojmp.so")).unwrap()].into_iter(),
+        [&std::ffi::CString::new(format!(
+            "{}/og_libpng_lfi/og_libpng_native_pic.so",
+            env!("CARGO_MANIFEST_DIR")
+        ))
+        .unwrap()]
+        .into_iter(),
         brand,
         //Some(GLOBAL_PKEY_ALLOC.get_pkey()),
         None,
