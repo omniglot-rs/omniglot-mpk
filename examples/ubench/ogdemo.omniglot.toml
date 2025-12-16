@@ -38,7 +38,3 @@ fntab_id = 11
 
 [functions.demo_invoke_callback]
 fntab_id = 12
-
-[types.demo_large_struct]
-
-[types.demo_two_size_t_struct]

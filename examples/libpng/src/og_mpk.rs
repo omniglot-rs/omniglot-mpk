@@ -145,7 +145,7 @@ pub fn decode_png<ID: OGID, RT: OGRuntime<ID = ID>, L: LibPng<ID, RT, RT = RT>, 
         OGMutSlice<'_, RT::ID, *mut u8>,
         usize,
         usize,
-        &mut AllocScope<RT::AllocTracker<'_>, RT::ID>,
+        &AllocScope<RT::AllocTracker<'_>, RT::ID>,
         &mut AccessScope<ID>,
     ) -> R,
 ) -> R {
@@ -254,6 +254,14 @@ pub fn decode_png<ID: OGID, RT: OGRuntime<ID = ID>, L: LibPng<ID, RT, RT = RT>, 
                 lib.png_read_image_nojmp(png_ptr, row_pointers_arr, alloc, access)
                     .unwrap();
 
+                let row_pointers_slice =
+                    OGMutSlice::upgrade_from_ptr(row_pointers_arr, row_count, alloc)
+                        .unwrap_or_else(|| {
+                            panic!(
+                                "Failed to upgrade row_pointers_slice: {:p}, {}",
+                                row_pointers_arr, row_count
+                            )
+                        });
                 f(row_pointers_slice, row_count, col_bytes, alloc, access)
             },
         )

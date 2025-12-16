@@ -520,11 +520,11 @@ pub fn libsodium_public_validate<
                             // decrypted.copy(access).validate().unwrap()
 
                             core::hint::black_box(
-                                &*decrypted
+                                str::from_utf8(&*decrypted
                                     .as_immut()
                                     .as_slice()
-                                    .validate_as_str(access)
-                                    .unwrap(),
+                                    .valid(access)
+                                ).unwrap(),
                             );
 
 			}).unwrap()

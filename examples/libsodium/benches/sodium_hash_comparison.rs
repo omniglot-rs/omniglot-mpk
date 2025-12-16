@@ -3,7 +3,7 @@ use omniglot::rt::OGRuntime;
 use og_libsodium::libsodium_bindings::{self, LibSodium};
 use og_libsodium::{libsodium_hash_og, libsodium_hash_unsafe, with_mpkrt_lib};
 
-use rand::distributions::Uniform;
+use rand::distr::Uniform;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 
@@ -66,7 +66,7 @@ pub fn criterion_benchmark(c: &mut Criterion) {
             for size in (0..).map(|n| 8usize.pow(n)).skip(2).take(4) {
                 // for size in [4096_usize] {
                 let to_hash = (&mut prng)
-                    .sample_iter(Uniform::new_inclusive(u8::MIN, u8::MAX))
+                    .sample_iter(Uniform::new_inclusive(u8::MIN, u8::MAX).unwrap())
                     .take(size)
                     .collect::<Vec<u8>>();
 
@@ -84,7 +84,7 @@ pub fn criterion_benchmark(c: &mut Criterion) {
                 group.bench_with_input(BenchmarkId::new("unsafe", size), &size, |b, _| {
                     for _ in 0..STACK_RANDOMIZE_ITERS {
                         let stack_bytes: usize = (&mut prng)
-                            .gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
+                            .random_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
                         push_stack_bytes(stack_bytes, || {
                             // println!("Pushed {} bytes onto the stack...", stack_bytes);
                             b.iter(|| libsodium_hash_unsafe(black_box(&to_hash)));
@@ -95,9 +95,9 @@ pub fn criterion_benchmark(c: &mut Criterion) {
                 group.bench_with_input(BenchmarkId::new("og_mpk", size), &size, |b, _| {
                     for _ in 0..STACK_RANDOMIZE_ITERS {
                         let stack_bytes: usize = (&mut prng)
-                            .gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
+                            .random_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
                         let foreign_stack_bytes: usize = (&mut prng)
-                            .gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
+                            .random_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
                         push_stack_bytes(stack_bytes, || {
                             lib.rt()
                                 .allocate_stacked_mut(
@@ -125,7 +125,7 @@ pub fn criterion_benchmark(c: &mut Criterion) {
                 group.bench_with_input(BenchmarkId::new("sandcrust", size), &size, |b, _| {
                     for _ in 0..STACK_RANDOMIZE_ITERS {
                         let stack_bytes: usize = (&mut prng)
-                            .gen_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
+                            .random_range(std::ops::RangeInclusive::new(1_usize, 4095_usize));
                         push_stack_bytes(stack_bytes, || {
                             // println!("Pushed {} bytes onto the stack...", stack_bytes);
                             b.iter(|| libsodium_hash_sandcrust(black_box(&to_hash)));
