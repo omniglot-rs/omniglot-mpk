@@ -2339,6 +2339,11 @@ impl<ID: OGID> OGMPKRuntime<ID> {
                 //
                 // Load the foreign stack pointer from our runtime:
                 mov r14, qword ptr [r10 + {rtas_foreign_stack_ptr_offset}]
+                // Preserve the entry foreign_stack_ptr so we can restore it verbatim
+                // on return (see the return path below). rbx is callee-saved and is
+                // saved/restored by the invoke wrapper + this function's epilogue, so
+                // it survives `call r11` and is preserved across nested reentrancy.
+                mov rbx, r14           // Save entry foreign_stack_ptr
                 sub r14, r13           // Subtract stack_spill
                 setc r15b              // If overflow, set r15b to 1, else 0
                 and r14, -16           // Align downward to a 16 byte boundary
@@ -2463,8 +2468,16 @@ impl<ID: OGID> OGMPKRuntime<ID> {
                 pop rdx
                 pop rax
 
-                // Save back the foreign stack pointer, and restore the Rust stack pointer:
-                mov qword ptr [r10 + {rtas_foreign_stack_ptr_offset}], rsp
+                // Restore the foreign stack pointer to its entry value, and restore the
+                // Rust stack pointer. We must write back the *entry* foreign_stack_ptr
+                // (saved in rbx), not rsp: at this point rsp is the decremented foreign
+                // stack pointer (entry - stack_spill, aligned down to 16), so writing rsp
+                // here permanently lowers the base by stack_spill on every call that
+                // passes stacked arguments (>6 args). Over many such calls that leaks the
+                // foreign stack and eventually trips the _stack_sub_underflow ud2. For
+                // register-only calls stack_spill is 0 so the two agree, which is why this
+                // only bites functions with stacked arguments.
+                mov qword ptr [r10 + {rtas_foreign_stack_ptr_offset}], rbx
                 mov rsp, qword ptr [r10 + {rtas_rust_stack_ptr_offset}]
 
                 // Encode the return value. We recover the InvokeRes pointer
